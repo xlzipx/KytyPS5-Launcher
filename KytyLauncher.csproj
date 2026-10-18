@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>KytyPS5</AssemblyName>
+    <RootNamespace>KytyLauncher</RootNamespace>
+    <ApplicationIcon>Assets\kytyps5.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.5.1</Version>
+    <Product>KytyPS5 Launcher</Product>
+    <Description>KytyPS5 Launcher</Description>
+    <Copyright>Copyright (C) 2026 ZIPEEK, GPL-2.0</Copyright>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>none</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="KytyPS5 Launcher - README.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="KytyPS5 Launcher - LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\mark.png" />
+    <Resource Include="Assets\controller.png" />
+    <Resource Include="Assets\kytyps5.ico" />
+  </ItemGroup>
+
+</Project>
