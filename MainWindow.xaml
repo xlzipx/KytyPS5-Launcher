@@ -185,9 +185,34 @@
                 <StackPanel>
                     <Grid Height="178">
                         <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource CoverTemplate}"/>
-                        <Button x:Name="PlayBtn" Style="{StaticResource PrimaryButton}" Width="54" Height="54" Padding="0" Click="RowPlay_Click" Tag="{Binding}"
-                                Opacity="0" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Play">
-                            <TextBlock Style="{StaticResource Icon}" Text="&#xE768;" FontSize="18" Margin="3,0,0,0"/>
+                        <!-- Hover: the cover darkens from below and a round play button rises in (selection shows none) -->
+                        <Border x:Name="Shade" CornerRadius="8" Opacity="0" IsHitTestVisible="False">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#100A1020" Offset="0"/>
+                                    <GradientStop Color="#A00A1020" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Button x:Name="PlayBtn" Width="56" Height="56" Click="RowPlay_Click" Tag="{Binding}" Opacity="0" Cursor="Hand"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Play" Focusable="False" RenderTransformOrigin="0.5,0.5">
+                            <Button.RenderTransform><ScaleTransform x:Name="PlayScale" ScaleX="0.8" ScaleY="0.8"/></Button.RenderTransform>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <Ellipse x:Name="Disc" Fill="{StaticResource AccentGradient}" Stroke="#66FFFFFF" StrokeThickness="1">
+                                            <Ellipse.Effect><DropShadowEffect Color="#2584FF" BlurRadius="18" ShadowDepth="0" Opacity="0.8"/></Ellipse.Effect>
+                                        </Ellipse>
+                                        <Path Data="M0,0 L15,9 L0,18 Z" Fill="White" Margin="4,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              StrokeLineJoin="Round" Stroke="White" StrokeThickness="1.5"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Disc" Property="Fill" Value="{StaticResource AccentGradientHover}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
                         </Button>
                     </Grid>
                     <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Margin="2,10,2,0" TextTrimming="CharacterEllipsis"/>
@@ -203,13 +228,40 @@
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                     <Setter TargetName="Card" Property="Background" Value="{StaticResource GameCardHoverBrush}"/>
-                    <Setter TargetName="PlayBtn" Property="Opacity" Value="1"/>
+                    <Setter TargetName="Card" Property="BorderBrush" Value="#3A5684"/>
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="Shade" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                                <DoubleAnimation Storyboard.TargetName="PlayBtn" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                                <DoubleAnimation Storyboard.TargetName="PlayScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.22">
+                                    <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetName="PlayScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.22">
+                                    <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.5"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                    <DataTrigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="Shade" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                <DoubleAnimation Storyboard.TargetName="PlayBtn" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                <DoubleAnimation Storyboard.TargetName="PlayScale" Storyboard.TargetProperty="ScaleX" To="0.8" Duration="0:0:0.15"/>
+                                <DoubleAnimation Storyboard.TargetName="PlayScale" Storyboard.TargetProperty="ScaleY" To="0.8" Duration="0:0:0.15"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.ExitActions>
                 </DataTrigger>
+                <!-- Selected: the accent edge and a soft glow, no play button -->
                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                     <Setter TargetName="Card" Property="Background" Value="{StaticResource GameCardSelectedBrush}"/>
                     <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                     <Setter TargetName="Card" Property="BorderThickness" Value="1.5"/>
-                    <Setter TargetName="PlayBtn" Property="Opacity" Value="1"/>
+                    <Setter TargetName="Card" Property="Effect">
+                        <Setter.Value><DropShadowEffect Color="#2584FF" BlurRadius="22" ShadowDepth="0" Opacity="0.45"/></Setter.Value>
+                    </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Exists}" Value="False">
                     <Setter TargetName="Card" Property="Opacity" Value="0.6"/>
