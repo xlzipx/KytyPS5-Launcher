@@ -330,7 +330,7 @@
                     </Border.Background>
                     <Grid>
                         <!-- Soft glow behind the logo -->
-                        <Ellipse Width="300" Height="180" VerticalAlignment="Top" Margin="0,-70,0,0" IsHitTestVisible="False" Opacity="0.35">
+                        <Ellipse Width="300" Height="180" VerticalAlignment="Top" Margin="0,-70,0,0" IsHitTestVisible="False" Opacity="0.24">
                             <Ellipse.Fill>
                                 <RadialGradientBrush>
                                     <GradientStop Color="#2A7BFF" Offset="0"/>
@@ -343,8 +343,9 @@
                             <StackPanel DockPanel.Dock="Top">
                                 <Image Source="pack://application:,,,/Assets/logo.png" Width="147" HorizontalAlignment="Center"
                                        RenderOptions.BitmapScalingMode="HighQuality">
+                                    <!-- A soft dark shadow lifts the logo off the glow behind it (a blue glow washed the blue out) -->
                                     <Image.Effect>
-                                        <DropShadowEffect Color="#2A7BFF" BlurRadius="16" ShadowDepth="0" Opacity="0.35"/>
+                                        <DropShadowEffect Color="#000814" BlurRadius="12" ShadowDepth="2" Direction="270" Opacity="0.75"/>
                                     </Image.Effect>
                                 </Image>
                                 <!-- Divider fading out at both ends -->
