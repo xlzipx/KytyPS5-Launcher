@@ -88,6 +88,38 @@
         <SolidColorBrush x:Key="GameCardHoverBrush" Color="#E615223A"/>
         <SolidColorBrush x:Key="GameCardSelectedBrush" Color="#EB13244A"/>
 
+        <!-- A library game's status in the compatibility list (GameEntry.Compat), coloured as on the Compatibility page -->
+        <DataTemplate x:Key="CompatChip">
+            <Border x:Name="Pill" CornerRadius="9" Padding="8,2,9,2" BorderThickness="1" Background="#1A2238" BorderBrush="#2A3654">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="Dot" Width="6" Height="6" VerticalAlignment="Center" Margin="0,1,6,0" Fill="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
+                </StackPanel>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="in-game">
+                    <Setter TargetName="Pill" Property="Background" Value="#1F3DDC97"/><Setter TargetName="Pill" Property="BorderBrush" Value="#663DDC97"/>
+                    <Setter TargetName="Dot" Property="Fill" Value="{StaticResource GoodBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="playable">
+                    <Setter TargetName="Pill" Property="Background" Value="#1F3DDC97"/><Setter TargetName="Pill" Property="BorderBrush" Value="#663DDC97"/>
+                    <Setter TargetName="Dot" Property="Fill" Value="{StaticResource GoodBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="main-menu">
+                    <Setter TargetName="Pill" Property="Background" Value="#1F4DA3FF"/><Setter TargetName="Pill" Property="BorderBrush" Value="#664DA3FF"/>
+                    <Setter TargetName="Dot" Property="Fill" Value="{StaticResource AccentTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="logo">
+                    <Setter TargetName="Pill" Property="Background" Value="#1FFFB547"/><Setter TargetName="Pill" Property="BorderBrush" Value="#66FFB547"/>
+                    <Setter TargetName="Dot" Property="Fill" Value="{StaticResource WarnBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="doesnt-boot">
+                    <Setter TargetName="Pill" Property="Background" Value="#1FFF5D73"/><Setter TargetName="Pill" Property="BorderBrush" Value="#66FF5D73"/>
+                    <Setter TargetName="Dot" Property="Fill" Value="{StaticResource BadBrush}"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
         <!-- List view row -->
         <DataTemplate x:Key="RowTemplate">
             <Border x:Name="Card" Height="112" Margin="0,0,10,10" CornerRadius="10" Background="{StaticResource GameCardBrush}"
@@ -100,7 +132,15 @@
                     </Grid.ColumnDefinitions>
                     <ContentPresenter Width="94" Height="94" Content="{Binding}" ContentTemplate="{StaticResource CoverTemplate}"/>
                     <StackPanel Grid.Column="1" Margin="20,0,12,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MaxWidth="360"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                            <ContentPresenter x:Name="Chip" Grid.Column="1" Content="{Binding Compat}" ContentTemplate="{StaticResource CompatChip}"
+                                              Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{Binding CompatTip}"/>
+                        </Grid>
                         <TextBlock Text="{Binding Subtitle}" FontSize="12.5" Margin="0,7,0,0" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
                         <StackPanel Style="{StaticResource ShaderRow}" Margin="0,8,0,0">
                             <Ellipse Style="{StaticResource ShaderDot}"/>
@@ -132,6 +172,9 @@
                     <Setter TargetName="Card" Property="Opacity" Value="0.6"/>
                     <Setter TargetName="PlayBtn" Property="IsEnabled" Value="False"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding HasCompat}" Value="False">
+                    <Setter TargetName="Chip" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
 
@@ -149,6 +192,8 @@
                     </Grid>
                     <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Margin="2,10,2,0" TextTrimming="CharacterEllipsis"/>
                     <TextBlock Text="{Binding Subtitle}" FontSize="11.5" Margin="2,4,2,2" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                    <ContentPresenter x:Name="Chip" Content="{Binding Compat}" ContentTemplate="{StaticResource CompatChip}" Margin="2,4,2,2"
+                                      HorizontalAlignment="Left" ToolTip="{Binding CompatTip}"/>
                     <StackPanel Style="{StaticResource ShaderRow}" Margin="2,4,2,2">
                         <Ellipse Style="{StaticResource ShaderDot}"/>
                         <TextBlock Text="{Binding ShaderText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
@@ -169,6 +214,9 @@
                 <DataTrigger Binding="{Binding Exists}" Value="False">
                     <Setter TargetName="Card" Property="Opacity" Value="0.6"/>
                     <Setter TargetName="PlayBtn" Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HasCompat}" Value="False">
+                    <Setter TargetName="Chip" Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>

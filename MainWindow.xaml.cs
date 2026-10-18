@@ -149,6 +149,7 @@ namespace KytyLauncher
             switch ((page ?? "").ToLowerInvariant())
             {
                 case "settings": NavSettings.IsChecked = true; break;
+                case "grid": NavGames.IsChecked = true; ViewTiles.IsChecked = true; break;
                 case "compat": case "compatibility": NavCompat.IsChecked = true; break;
                 case "logs": NavLogs.IsChecked = true; break;
                 case "about": NavAbout.IsChecked = true; break;

@@ -290,6 +290,8 @@ namespace KytyLauncher.Core
             var ids = new HashSet<string>(library.Select(g => g.TitleId).Where(t => !string.IsNullOrEmpty(t)), StringComparer.OrdinalIgnoreCase);
             var titles = new HashSet<string>(library.Select(g => Normalize(g.Title)).Where(t => t.Length > 0));
             foreach (var game in Games) game.InLibrary = ids.Contains(game.TitleId ?? "") || titles.Contains(Normalize(game.Title));
+            // ...and each library game gets its entry (its status shown in the library).
+            foreach (var game in library) game.Compat = Find(game);
         }
 
         /// <summary>The list's entry for a library game (by ID, else by title).</summary>

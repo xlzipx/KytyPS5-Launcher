@@ -80,6 +80,13 @@ namespace KytyLauncher.Core
             }
         }
 
+        CompatGame compat;
+        /// <summary>This game's entry in the KytyPS5 compatibility list (Compatibility.MarkLibrary); null when it is not listed.</summary>
+        public CompatGame Compat { get => compat; set { compat = value; Changed(); Changed(nameof(HasCompat)); Changed(nameof(CompatTip)); } }
+        public bool HasCompat => compat != null;
+        public string CompatTip => compat == null ? null
+            : $"KytyPS5 compatibility list: {compat.StatusText}" + (compat.TestedText.Length > 0 ? $", {compat.TestedText}" : "") + $" ({compat.ReportsText})";
+
         bool selected;
         public bool IsSelected { get => selected; set { selected = value; Changed(); } }
 
