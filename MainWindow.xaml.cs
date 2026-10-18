@@ -780,7 +780,9 @@ namespace KytyLauncher
             // A crossfade: the artwork as it shows now moves to the lower layer and fades out while the new one fades in
             // over it; the scrims stay as long as either shows.
             var ease = new SineEase { EasingMode = EasingMode.EaseInOut };
-            var duration = TimeSpan.FromMilliseconds(650);
+            // Slow between two games' art; quick when the art goes (another page), so it does not linger behind it;
+            // in between when it comes back.
+            var duration = TimeSpan.FromMilliseconds(source == null ? 150 : Backdrop.Source == null ? 300 : 650);
             BackdropOld.BeginAnimation(OpacityProperty, null);
             BackdropOld.Source = Backdrop.Source;
             BackdropOld.Opacity = Backdrop.Opacity;
