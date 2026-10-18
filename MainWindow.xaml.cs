@@ -1018,6 +1018,7 @@ namespace KytyLauncher
             }
             var perfOverlay = !scripted && takes("--perf-overlay");
             Overlay.IsEnabled = scripted || perfOverlay;
+            OverlayOptions.Visibility = scripted || perfOverlay ? Visibility.Visible : Visibility.Collapsed;
             OverlayNote.Text = scripted ? "top right: frame rate and frame times; detailed: GPU, CPU, memory"
                 : perfOverlay ? "the emulator's performance panel (F2; Shift+F2 detailed)" : "not in this emulator";
             offer(Fullscreen, takes("--fullscreen"), "fullscreen");
@@ -1046,6 +1047,10 @@ namespace KytyLauncher
             // Render height, aspect ratio and graphics are Demon's Souls' own (run-windows.ps1); the static precompile reads
             // its engine's files only.
             var des = (Selected?.IsDemonsSouls ?? true) && scripted;
+            // A build's own extras are shown only where they work (the official launcher's options stay, greyed, below).
+            DesOptions.Visibility = des ? Visibility.Visible : Visibility.Collapsed;
+            FrameGenOptions.Visibility = scripted ? Visibility.Visible : Visibility.Collapsed;
+            KeepAspect.Visibility = scripted ? Visibility.Visible : Visibility.Collapsed;
             foreach (var c in new Control[] { RenderHeight, Ratio, Quality }) c.IsEnabled = des;
             foreach (var t in new[] { RenderNote, RatioNote, QualityNote }) t.Visibility = des ? Visibility.Visible : Visibility.Collapsed;
             foreach (var t in new[] { RenderOnly, RatioOnly, QualityOnly })

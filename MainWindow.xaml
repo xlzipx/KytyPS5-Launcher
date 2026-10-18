@@ -771,66 +771,75 @@
                                         </StackPanel>
 
 
-                                        <TextBlock Style="{StaticResource Label}" Text="Render height"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox x:Name="RenderHeight" SelectionChanged="Setting_Changed"/>
-                                            <TextBlock x:Name="RenderNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="Demon's Souls 3D; lower = faster, less sharp"/>
-                                            <TextBlock x:Name="RenderOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
-                                        </Grid>
+                                        <!-- The Demon's Souls build's own render options: shown only for Demon's Souls on that build -->
+                                        <StackPanel x:Name="DesOptions">
+                                            <TextBlock Style="{StaticResource Label}" Text="Render height"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="RenderHeight" SelectionChanged="Setting_Changed"/>
+                                                <TextBlock x:Name="RenderNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="Demon's Souls 3D; lower = faster, less sharp"/>
+                                                <TextBlock x:Name="RenderOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
+                                            </Grid>
 
-                                        <TextBlock Style="{StaticResource Label}" Text="Aspect ratio"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox x:Name="Ratio" SelectionChanged="Setting_Changed"/>
-                                            <TextBlock x:Name="RatioNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="the 3D wider (more to the sides); the HUD keeps its shape, menus stretch, movies stay 16:9"/>
-                                            <TextBlock x:Name="RatioOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
-                                        </Grid>
+                                            <TextBlock Style="{StaticResource Label}" Text="Aspect ratio"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="Ratio" SelectionChanged="Setting_Changed"/>
+                                                <TextBlock x:Name="RatioNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="the 3D wider (more to the sides); the HUD keeps its shape, menus stretch, movies stay 16:9"/>
+                                                <TextBlock x:Name="RatioOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
+                                            </Grid>
 
-                                        <TextBlock Style="{StaticResource Label}" Text="Graphics"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox x:Name="Quality" SelectionChanged="Setting_Changed">
-                                                <ComboBox.ToolTip>
-                                                    <TextBlock>Standard: the PS5's picture. With less than 12 GB of video memory, large textures leave out their largest level (half the size per side) so that they fit.<LineBreak/>Low: simpler shadows and distant detail, textures half the size per side.<LineBreak/>Lowest: simpler still, textures a quarter the size per side.</TextBlock>
-                                                </ComboBox.ToolTip>
-                                            </ComboBox>
-                                            <TextBlock x:Name="QualityNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="simpler shadows and detail, smaller textures; faster on weaker PCs"/>
-                                            <TextBlock x:Name="QualityOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
-                                        </Grid>
+                                            <TextBlock Style="{StaticResource Label}" Text="Graphics"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="Quality" SelectionChanged="Setting_Changed">
+                                                    <ComboBox.ToolTip>
+                                                        <TextBlock>Standard: the PS5's picture. With less than 12 GB of video memory, large textures leave out their largest level (half the size per side) so that they fit.<LineBreak/>Low: simpler shadows and distant detail, textures half the size per side.<LineBreak/>Lowest: simpler still, textures a quarter the size per side.</TextBlock>
+                                                    </ComboBox.ToolTip>
+                                                </ComboBox>
+                                                <TextBlock x:Name="QualityNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="simpler shadows and detail, smaller textures; faster on weaker PCs"/>
+                                                <TextBlock x:Name="QualityOnly" Grid.Column="1" Style="{StaticResource SideNote}" Visibility="Collapsed" Foreground="{StaticResource WarnBrush}" Text="Demon's Souls only: not used for this game"/>
+                                            </Grid>
 
-                                        <TextBlock Style="{StaticResource Label}" Text="Frame generation"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox x:Name="FrameGen" SelectionChanged="Setting_Changed">
-                                                <ComboBox.ToolTip>
-                                                    <TextBlock>Shown frames = the game's frames x the multiplier. With VSync on, they are capped at the display's refresh (a 60 Hz display at 2x runs the game at 30 fps). The game's frames stay at 60 with "Up to 120 fps" too: frame generation needs them evenly spaced.</TextBlock>
-                                                </ComboBox.ToolTip>
-                                            </ComboBox>
-                                            <TextBlock x:Name="FrameGenNote" Grid.Column="1" Style="{StaticResource SideNote}"/>
-                                        </Grid>
+                                        </StackPanel>
+                                        <!-- Frame generation: builds with Streamline (the Demon's Souls build) -->
+                                        <StackPanel x:Name="FrameGenOptions">
+                                            <TextBlock Style="{StaticResource Label}" Text="Frame generation"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="FrameGen" SelectionChanged="Setting_Changed">
+                                                    <ComboBox.ToolTip>
+                                                        <TextBlock>Shown frames = the game's frames x the multiplier. With VSync on, they are capped at the display's refresh (a 60 Hz display at 2x runs the game at 30 fps). The game's frames stay at 60 with "Up to 120 fps" too: frame generation needs them evenly spaced.</TextBlock>
+                                                    </ComboBox.ToolTip>
+                                                </ComboBox>
+                                                <TextBlock x:Name="FrameGenNote" Grid.Column="1" Style="{StaticResource SideNote}"/>
+                                            </Grid>
 
-                                        <TextBlock Style="{StaticResource Label}" Text="Overlay"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="150"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <ComboBox x:Name="Overlay" SelectionChanged="Setting_Changed"/>
-                                            <TextBlock x:Name="OverlayNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="top right: frame rate and frame times; detailed: GPU, CPU, memory"/>
-                                        </Grid>
+                                        </StackPanel>
+                                        <!-- The overlay: the Demon's Souls build's panel, or the official build's performance panel -->
+                                        <StackPanel x:Name="OverlayOptions">
+                                            <TextBlock Style="{StaticResource Label}" Text="Overlay"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox x:Name="Overlay" SelectionChanged="Setting_Changed"/>
+                                                <TextBlock x:Name="OverlayNote" Grid.Column="1" Style="{StaticResource SideNote}" Text="top right: frame rate and frame times; detailed: GPU, CPU, memory"/>
+                                            </Grid>
+                                        </StackPanel>
                                         <TextBlock Style="{StaticResource Label}" Text="Stability and compatibility"/>
                                         <StackPanel>
                                             <CheckBox x:Name="SafeGpu" Click="Setting_Changed"
