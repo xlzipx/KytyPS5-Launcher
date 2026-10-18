@@ -150,8 +150,8 @@
     <Style TargetType="Button" x:Key="RowPlayButton" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Width" Value="110"/>
         <Setter Property="Height" Value="40"/>
-        <Setter Property="Background" Value="#16223A"/>
-        <Setter Property="BorderBrush" Value="#203253"/>
+        <Setter Property="Background" Value="#1B2A46"/>
+        <Setter Property="BorderBrush" Value="#2E446C"/>
     </Style>
 
     <Style TargetType="Button" x:Key="IconButton">
@@ -183,7 +183,7 @@
 
     <!-- Title bar buttons -->
     <Style TargetType="Button" x:Key="CaptionButton">
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="Foreground" Value="#C8D2E6"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Width" Value="46"/>
         <Setter Property="Height" Value="36"/>

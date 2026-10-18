@@ -84,14 +84,14 @@
         </DataTemplate>
 
         <!-- Game cards over the artwork: translucent, so the selected game's art shows through -->
-        <SolidColorBrush x:Key="GameCardBrush" Color="#A6101A2E"/>
-        <SolidColorBrush x:Key="GameCardHoverBrush" Color="#C015223A"/>
-        <SolidColorBrush x:Key="GameCardSelectedBrush" Color="#CC13244A"/>
+        <SolidColorBrush x:Key="GameCardBrush" Color="#D8101A2E"/>
+        <SolidColorBrush x:Key="GameCardHoverBrush" Color="#E615223A"/>
+        <SolidColorBrush x:Key="GameCardSelectedBrush" Color="#EB13244A"/>
 
         <!-- List view row -->
         <DataTemplate x:Key="RowTemplate">
             <Border x:Name="Card" Height="112" Margin="0,0,10,10" CornerRadius="10" Background="{StaticResource GameCardBrush}"
-                    BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" Padding="8" Cursor="Hand">
+                    BorderBrush="#2A3A5A" BorderThickness="1" Padding="8" Cursor="Hand">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -431,15 +431,27 @@
                     <Rectangle x:Name="BackdropScrim" Grid.RowSpan="2" IsHitTestVisible="False" Opacity="{Binding Opacity, ElementName=Backdrop}">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#A00A1020" Offset="0"/>
-                                <GradientStop Color="#400A1020" Offset="0.55"/>
-                                <GradientStop Color="#200A1020" Offset="1"/>
+                                <GradientStop Color="#C80A1020" Offset="0"/>
+                                <GradientStop Color="#A00A1020" Offset="0.45"/>
+                                <GradientStop Color="#5A0A1020" Offset="0.66"/>
+                                <GradientStop Color="#380A1020" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <!-- ...and darker at the top, behind the title, the search and the window buttons -->
+                    <Rectangle Grid.RowSpan="2" Height="190" VerticalAlignment="Top" IsHitTestVisible="False" Opacity="{Binding Opacity, ElementName=Backdrop}">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#D00A1020" Offset="0"/>
+                                <GradientStop Color="#700A1020" Offset="0.5"/>
+                                <GradientStop Color="#000A1020" Offset="1"/>
                             </LinearGradientBrush>
                         </Rectangle.Fill>
                     </Rectangle>
 
                     <!-- Title bar -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <StackPanel.Effect><DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="0" Opacity="0.85"/></StackPanel.Effect>
                         <Button x:Name="MinButton" Style="{StaticResource CaptionButton}" Content="&#xE921;" WindowChrome.IsHitTestVisibleInChrome="True" Click="Min_Click" ToolTip="Minimize"/>
                         <Button x:Name="MaxButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" WindowChrome.IsHitTestVisibleInChrome="True" Click="Max_Click" ToolTip="Maximize"/>
                         <Button Style="{StaticResource CloseCaptionButton}" Content="&#xE8BB;" WindowChrome.IsHitTestVisibleInChrome="True" Click="Close_Click" ToolTip="Close"/>

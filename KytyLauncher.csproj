@@ -10,7 +10,7 @@
     <RootNamespace>KytyLauncher</RootNamespace>
     <ApplicationIcon>Assets\kytyps5.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.5.1</Version>
+    <Version>1.5.2</Version>
     <Product>KytyPS5 Launcher</Product>
     <Description>KytyPS5 Launcher</Description>
     <Copyright>Copyright (C) 2026 ZIPEEK, GPL-2.0</Copyright>
