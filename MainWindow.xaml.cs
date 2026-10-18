@@ -777,12 +777,24 @@ namespace KytyLauncher
         {
             var source = NavGames.IsChecked == true ? Selected?.Backdrop : null;
             if (Backdrop.Source == source) return;
+            // Another page: the art goes at once with the Games page (a fade would show it alone behind the new page for a
+            // moment, a blink).
+            if (source == null)
+            {
+                foreach (var layer in new UIElement[] { Backdrop, BackdropOld, BackdropScrim, TopScrim })
+                {
+                    layer.BeginAnimation(OpacityProperty, null);
+                    layer.Opacity = 0;
+                }
+                Backdrop.Source = null;
+                BackdropOld.Source = null;
+                return;
+            }
             // A crossfade: the artwork as it shows now moves to the lower layer and fades out while the new one fades in
             // over it; the scrims stay as long as either shows.
             var ease = new SineEase { EasingMode = EasingMode.EaseInOut };
-            // Slow between two games' art; quick when the art goes (another page), so it does not linger behind it;
-            // in between when it comes back.
-            var duration = TimeSpan.FromMilliseconds(source == null ? 150 : Backdrop.Source == null ? 300 : 650);
+            // Slow between two games' art; quicker when it comes back with the Games page.
+            var duration = TimeSpan.FromMilliseconds(Backdrop.Source == null ? 300 : 650);
             BackdropOld.BeginAnimation(OpacityProperty, null);
             BackdropOld.Source = Backdrop.Source;
             BackdropOld.Opacity = Backdrop.Opacity;
