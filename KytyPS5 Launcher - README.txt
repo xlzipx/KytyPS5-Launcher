@@ -46,6 +46,11 @@ Updates
   caches and settings stay; the replaced files are kept in the build's _Update\backup.
   For a build it does not know, enter its GitHub repository once beside it.
 
+The launcher's own updates
+  About shows when a newer launcher is out ("Update to …"): it downloads the release,
+  checks its SHA-256 digest, replaces its own files and restarts. The library,
+  settings and emulator builds stay as they are.
+
 Shaders
   A game stutters the first time it meets new shaders. KytyPS5 records them while you
   play and compiles them before the next start, so a place stutters only once. Builds

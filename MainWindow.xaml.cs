@@ -80,7 +80,7 @@ namespace KytyLauncher
             compatTimer.Tick += (s, e) => CheckCompat(false);
             compatTimer.Start();
             CheckCompat(false);
-            if (settings.CheckUpdates) Loaded += (s, e) => CheckAllBuilds(false);
+            if (settings.CheckUpdates) Loaded += (s, e) => { CheckAllBuilds(false); CheckLauncher(false); };
             Loaded += (s, e) => WarnIfReadOnly();
 
             SourceInitialized += (s, e) => RoundCorners();
@@ -436,6 +436,14 @@ namespace KytyLauncher
         /// <summary>The sidebar card: the builds' update state.</summary>
         void UpdateSidebarStatus()
         {
+            if (launcherRelease != null)
+            {
+                SidebarStatus.Text = "Launcher update available";
+                SidebarDot.Fill = (Brush)FindResource("AccentBrush");
+                SidebarDotGlow.Color = ((SolidColorBrush)SidebarDot.Fill).Color;
+                SidebarDotGlow.Opacity = 0.9;
+                return;
+            }
             if (!emulators.Any(e => e.Exists))
             {
                 SidebarStatus.Text = "No emulator yet";
@@ -459,8 +467,98 @@ namespace KytyLauncher
 
         void SidebarCard_Click(object sender, RoutedEventArgs e)
         {
+            if (launcherRelease != null) { NavAbout.IsChecked = true; return; }
             NavSettings.IsChecked = true;
             PageSettings.ScrollToTop();
+        }
+
+        // ---- The launcher's own updates (SelfUpdate) ------------------------------------------------------------------
+
+        BuildUpdates.Release launcherRelease, launcherLatest;
+        bool launcherBusy;
+
+        async void CheckLauncher(bool announce)
+        {
+            if (launcherBusy) return;
+            launcherBusy = true;
+            LauncherUpdateBtn.IsEnabled = false;
+            LauncherUpdateStatus.Text = "Checking for launcher updates…";
+            try
+            {
+                BuildUpdates.Release latest = null;
+                launcherRelease = await Task.Run(() => SelfUpdate.Newer(out latest));
+                launcherLatest = latest;
+                var current = SelfUpdate.Current;
+                var released = SelfUpdate.TagVersion(latest?.Tag);
+                if (launcherRelease != null)
+                {
+                    LauncherUpdateStatus.Text = $"Version {released} is available (you have {current})";
+                    LauncherUpdateText.Text = $"Update to {released}";
+                    LauncherUpdateBtn.Style = (Style)FindResource("PrimaryButton");
+                    LauncherUpdateDot.Fill = (Brush)FindResource("AccentBrush");
+                    if (!announce) ShowToast($"KytyPS5 Launcher {released} is available (About)");
+                }
+                else
+                {
+                    LauncherUpdateStatus.Text = released != null && released < current
+                        ? $"Up to date (this {current} is newer than the latest release, {released})"
+                        : $"Up to date (latest release {latest?.Tag})";
+                    LauncherUpdateText.Text = "Check for updates";
+                    LauncherUpdateBtn.ClearValue(StyleProperty);
+                    LauncherUpdateDot.Fill = (Brush)FindResource("GoodBrush");
+                    if (announce) ShowToast("The launcher is up to date");
+                }
+                LauncherNotes.Visibility = latest?.Page != null ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                LauncherUpdateStatus.Text = "Could not check for launcher updates: " + ex.Message;
+                LauncherUpdateDot.Fill = (Brush)FindResource("WarnBrush");
+            }
+            finally
+            {
+                launcherBusy = false;
+                LauncherUpdateBtn.IsEnabled = true;
+                UpdateSidebarStatus();
+            }
+        }
+
+        void LauncherNotes_Click(object sender, RoutedEventArgs e)
+        {
+            if (launcherLatest?.Page != null) OpenUrl(launcherLatest.Page);
+        }
+
+        async void LauncherUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (launcherRelease == null) { CheckLauncher(true); return; }
+            var release = launcherRelease;
+            var answer = MessageBox.Show(this,
+                $"Update KytyPS5 Launcher to {SelfUpdate.TagVersion(release.Tag)}?\n\n" +
+                $"Downloads {release.Asset} from github.com/{SelfUpdate.Repo}" + (release.Sha256 != null ? ", checks its SHA-256 digest" : "") +
+                ", replaces the launcher's own files and restarts it. Your library, settings and emulator builds stay as they are.",
+                "Update KytyPS5 Launcher", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.OK) return;
+            launcherBusy = true;
+            LauncherUpdateBtn.IsEnabled = false;
+            try
+            {
+                await Task.Run(() => SelfUpdate.Install(release, text => App.OnUi(() => LauncherUpdateStatus.Text = text)));
+                LauncherUpdateStatus.Text = "Restarting…";
+                ReadSettings();
+                StoreGameSettings();
+                settings.Save();
+                library.Save();
+                App.ReleaseSingle();
+                SelfUpdate.Restart(Environment.GetCommandLineArgs().Skip(1).ToArray());
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                launcherBusy = false;
+                LauncherUpdateBtn.IsEnabled = true;
+                LauncherUpdateStatus.Text = "The update failed: " + ex.Message;
+                MessageBox.Show(this, "The launcher was not updated:\n" + ex.Message, "Update KytyPS5 Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         async void BuildCheck_Click(object sender, RoutedEventArgs e)
@@ -1138,7 +1236,7 @@ namespace KytyLauncher
 
         void StreamlineDownload_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.StreamlineSdkUrl);
         void Repo_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.RepositoryUrl);
-        void Releases_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.RepositoryUrl + "/releases/latest");
+
 
         // ---- Actions ------------------------------------------------------------------------------------------------
 

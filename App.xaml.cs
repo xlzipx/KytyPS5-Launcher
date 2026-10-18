@@ -56,8 +56,15 @@ namespace KytyLauncher
             catch { }
         }
 
+        /// <summary>Lets the updated launcher start while this one closes.</summary>
+        public static void ReleaseSingle()
+        {
+            try { single?.ReleaseMutex(); single?.Dispose(); single = null; } catch { }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
+            Core.SelfUpdate.CleanUp();
             DispatcherUnhandledException += (s, a) => { Report(a.Exception); a.Handled = true; };
             AppDomain.CurrentDomain.UnhandledException += (s, a) => { if (a.ExceptionObject is Exception ex) Report(ex); };
             System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (s, a) => a.SetObserved();
@@ -66,6 +73,12 @@ namespace KytyLauncher
             if (!e.Args.Contains("--screenshot"))
             {
                 single = new System.Threading.Mutex(true, @"Local\KytyPS5Launcher", out var first);
+                // Restarted after an update: the old launcher is closing; wait for it.
+                if (!first && e.Args.Contains("--updated"))
+                {
+                    try { first = single.WaitOne(TimeSpan.FromSeconds(20)); }
+                    catch (System.Threading.AbandonedMutexException) { first = true; }
+                }
                 if (!first)
                 {
                     var me = System.Diagnostics.Process.GetCurrentProcess();

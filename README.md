@@ -24,6 +24,8 @@ keeps every build up to date.
 - **The official launcher's options**: resolution, fullscreen, HDR, VSync, 120 fps, console language, AMD CPU patch,
   rendering compatibility fixes, add-ons (DLC), cheat files, user profile, DualSense lightbar, vibration and speaker,
   graphics card choice, trophy notifications and debug options; plus **Safe GPU mode** for builds that support it.
+- **Updates itself**: About shows when a newer launcher is out; one click downloads it, checks its SHA-256 digest and
+  restarts the launcher with your library and settings as they were.
 - **Compatibility list** live from [kytyps5.github.io](https://kytyps5.github.io), with your own games marked and new or
   changed entries highlighted.
 - **Shader precompile** for builds that offer it, and the state of each game's shaders at a glance.
