@@ -1255,7 +1255,7 @@ namespace KytyLauncher
         static void OpenUrl(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
         void StreamlineDownload_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.StreamlineSdkUrl);
-        void Repo_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.RepositoryUrl);
+        void Repo_Click(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/" + SelfUpdate.Repo);
 
 
         // ---- Actions ------------------------------------------------------------------------------------------------
