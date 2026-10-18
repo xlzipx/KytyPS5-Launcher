@@ -65,6 +65,8 @@ namespace KytyLauncher
 
             FillSettings();
             SortBox.SelectedIndex = 0;
+            // The library's view as it was left (grid for a new library).
+            if (settings.View == "grid") ViewTiles.IsChecked = true;
             var current = library.Find(settings.Game) ?? games.FirstOrDefault();
             GameList.SelectedItem = current;
             UpdateEmpty();
@@ -673,6 +675,11 @@ namespace KytyLauncher
             var tiles = ViewTiles.IsChecked == true;
             GameList.ItemTemplate = (DataTemplate)FindResource(tiles ? "TileTemplate" : "RowTemplate");
             GameList.ItemsPanel = (ItemsPanelTemplate)FindResource(tiles ? "TilePanel" : "RowPanel");
+            if (!loading && settings != null)
+            {
+                settings.View = tiles ? "grid" : "list";
+                settings.Save();
+            }
         }
 
         void UpdateEmpty()

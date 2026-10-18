@@ -119,6 +119,8 @@ namespace KytyLauncher.Core
         public bool VulkanValidation { get => Bool("vulkanvalidation"); set => values["vulkanvalidation"] = value; }
         public bool ShaderValidation { get => Bool("shadervalidation"); set => values["shadervalidation"] = value; }
         public bool RenderDoc { get => Bool("renderdoc"); set => values["renderdoc"] = value; }
+        /// <summary>The Games page's view: "grid" (the default) or "list".</summary>
+        public string View { get => values.ContainsKey("view") && Str("view") == "list" ? "list" : "grid"; set => values["view"] = value; }
         public bool CheckUpdates { get => BoolOr("checkUpdates", true); set => values["checkUpdates"] = value; }
         public bool PrecompilePrompt { get => BoolOr("precompilePrompt", true); set => values["precompilePrompt"] = value; }
 

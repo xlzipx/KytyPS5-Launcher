@@ -13,7 +13,8 @@ keeps every build up to date.
 
 ## Features
 
-- **Game library** with each game's cover and artwork, search, list or grid view, and settings saved per game.
+- **Game library** with each game's cover and artwork, its status in the KytyPS5 compatibility list, search, grid or
+  list view, and settings saved per game.
 - **Works out of the box**: without an emulator it offers to download the latest official KytyPS5 release in one click.
 - **Several emulator builds side by side**: the official KytyPS5 and community builds made for particular games. Each
   game picks its build, and the launcher reads what each build supports (its `--help` and switches), so a game is offered
@@ -33,6 +34,8 @@ keeps every build up to date.
 | Settings | Compatibility |
 | --- | --- |
 | ![Settings](docs/settings.png) | ![Compatibility](docs/compatibility.png) |
+| **About** | |
+| ![About](docs/about.png) | |
 
 ## Getting started
 

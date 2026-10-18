@@ -1578,7 +1578,7 @@
                                                                                     </Grid>
                                                                                     <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
                                                                                         <StackPanel Orientation="Horizontal">
-                                                                                            <TextBlock x:Name="Name" Text="ZIPEEK" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                                                                            <TextBlock Text="ZIPEEK" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
                                                                                         </StackPanel>
                                                                                         <TextBlock Text="Creator of KytyPS5 Launcher" FontSize="12.5" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                                                                                     </StackPanel>
