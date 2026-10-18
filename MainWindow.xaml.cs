@@ -777,8 +777,20 @@ namespace KytyLauncher
         {
             var source = NavGames.IsChecked == true ? Selected?.Backdrop : null;
             if (Backdrop.Source == source) return;
+            // A crossfade: the artwork as it shows now moves to the lower layer and fades out while the new one fades in
+            // over it; the scrims stay as long as either shows.
+            var ease = new SineEase { EasingMode = EasingMode.EaseInOut };
+            var duration = TimeSpan.FromMilliseconds(650);
+            BackdropOld.BeginAnimation(OpacityProperty, null);
+            BackdropOld.Source = Backdrop.Source;
+            BackdropOld.Opacity = Backdrop.Opacity;
+            BackdropOld.BeginAnimation(OpacityProperty, new DoubleAnimation(0, duration) { EasingFunction = ease });
+            Backdrop.BeginAnimation(OpacityProperty, null);
+            Backdrop.Opacity = 0;
             Backdrop.Source = source;
-            Backdrop.BeginAnimation(OpacityProperty, new DoubleAnimation(source == null ? 0 : 1, TimeSpan.FromMilliseconds(350)));
+            if (source != null) Backdrop.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
+            foreach (var scrim in new UIElement[] { BackdropScrim, TopScrim })
+                scrim.BeginAnimation(OpacityProperty, new DoubleAnimation(source == null ? 0 : 1, duration) { EasingFunction = ease });
         }
 
         void GameItem_DoubleClick(object sender, MouseButtonEventArgs e)

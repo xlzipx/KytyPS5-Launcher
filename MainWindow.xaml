@@ -517,6 +517,18 @@
                     </Grid.RowDefinitions>
 
                     <!-- Selected game's artwork behind the library -->
+                    <!-- The previous game's artwork, fading out under the new one (a crossfade) -->
+                    <Image x:Name="BackdropOld" Grid.RowSpan="2" Stretch="UniformToFill" VerticalAlignment="Top" HorizontalAlignment="Left"
+                           Opacity="0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.OpacityMask>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F0000000" Offset="0"/>
+                                <GradientStop Color="#B0000000" Offset="0.45"/>
+                                <GradientStop Color="#50000000" Offset="0.8"/>
+                                <GradientStop Color="#28000000" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Image.OpacityMask>
+                    </Image>
                     <Image x:Name="Backdrop" Grid.RowSpan="2" Stretch="UniformToFill" VerticalAlignment="Top" HorizontalAlignment="Left"
                            Opacity="0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality">
                         <Image.OpacityMask>
@@ -529,7 +541,7 @@
                         </Image.OpacityMask>
                     </Image>
                     <!-- A scrim over the artwork: darker to the left (the list), so text stays readable while the art shows -->
-                    <Rectangle x:Name="BackdropScrim" Grid.RowSpan="2" IsHitTestVisible="False" Opacity="{Binding Opacity, ElementName=Backdrop}">
+                    <Rectangle x:Name="BackdropScrim" Grid.RowSpan="2" IsHitTestVisible="False" Opacity="0">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Color="#C80A1020" Offset="0"/>
@@ -540,7 +552,7 @@
                         </Rectangle.Fill>
                     </Rectangle>
                     <!-- ...and darker at the top, behind the title, the search and the window buttons -->
-                    <Rectangle Grid.RowSpan="2" Height="190" VerticalAlignment="Top" IsHitTestVisible="False" Opacity="{Binding Opacity, ElementName=Backdrop}">
+                    <Rectangle x:Name="TopScrim" Grid.RowSpan="2" Height="190" VerticalAlignment="Top" IsHitTestVisible="False" Opacity="0">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                 <GradientStop Color="#D00A1020" Offset="0"/>
