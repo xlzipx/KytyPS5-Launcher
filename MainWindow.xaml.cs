@@ -519,6 +519,8 @@ namespace KytyLauncher
             {
                 launcherBusy = false;
                 LauncherUpdateBtn.IsEnabled = true;
+                NavIcon.SetBadge(NavAbout, launcherRelease != null);
+                NavAbout.ToolTip = launcherRelease != null ? "A launcher update is available" : null;
                 UpdateSidebarStatus();
             }
         }

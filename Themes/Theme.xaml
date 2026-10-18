@@ -280,11 +280,18 @@
                                 </Grid.Effect>
                             </Grid>
                             <ContentPresenter Margin="16,0,0,1" VerticalAlignment="Center"/>
+                            <!-- Something new there (NavIcon.Badge) -->
+                            <Ellipse x:Name="Badge" Width="8" Height="8" Margin="10,1,0,0" VerticalAlignment="Center" Fill="#4DA3FF" Visibility="Collapsed">
+                                <Ellipse.Effect><DropShadowEffect Color="#3D9BFF" BlurRadius="10" ShadowDepth="0" Opacity="1"/></Ellipse.Effect>
+                            </Ellipse>
                         </StackPanel>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="local:NavIcon.Image" Value="{x:Null}">
                             <Setter TargetName="ImageGlyph" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="local:NavIcon.Badge" Value="True">
+                            <Setter TargetName="Badge" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
