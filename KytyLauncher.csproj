@@ -33,6 +33,7 @@
     <None Include="KytyPS5 Launcher - LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
     <Resource Include="Assets\logo.png" />
     <Resource Include="Assets\mark.png" />
+    <Resource Include="Assets\zipeek.png" />
     <Resource Include="Assets\controller.png" />
     <Resource Include="Assets\kytyps5.ico" />
   </ItemGroup>

@@ -1257,6 +1257,7 @@ namespace KytyLauncher
         void StreamlineDownload_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.StreamlineSdkUrl);
         void Repo_Click(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/" + SelfUpdate.Repo);
         void KytyRepo_Click(object sender, RoutedEventArgs e) => OpenUrl(Emulator.RepositoryUrl);
+        void Author_Click(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/xlzipx");
 
 
         // ---- Actions ------------------------------------------------------------------------------------------------
