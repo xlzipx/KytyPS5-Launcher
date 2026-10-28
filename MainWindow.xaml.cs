@@ -938,6 +938,7 @@ namespace KytyLauncher
 
         void FillSettings()
         {
+            extraCount = -1; // (the game's extra options are rebuilt from the settings shown)
             Resolution.ItemsSource = Emulator.Resolutions;
             Resolution.SelectedItem = Emulator.Resolutions.Contains(settings.Resolution) ? settings.Resolution : "2560x1440";
             Fullscreen.IsChecked = settings.Fullscreen;
@@ -1019,6 +1020,101 @@ namespace KytyLauncher
 
         readonly Dictionary<Control, object> ownTips = new Dictionary<Control, object>();
 
+        EmulatorInstall extraBuild;
+        GameEntry extraGame;
+        int extraCount = -1;
+
+        /// <summary>"More options of this build": a control for each option of the build's --help that the launcher has
+        /// none of its own for - a check box for a switch or true/false, a list for a choice, a text box otherwise. Rebuilt
+        /// when the game or its build changes, or when the build's options are read again (after an update).</summary>
+        void BuildExtraOptions(EmulatorInstall build)
+        {
+            var options = build.Probed ? build.ExtraOptions : new List<EmulatorInstall.BuildOption>();
+            if (build == extraBuild && Selected == extraGame && options.Count == extraCount) return;
+            extraBuild = build; extraGame = Selected; extraCount = options.Count;
+            ExtraPanel.Children.Clear();
+            ExtraSection.Visibility = options.Count > 0 && Selected != null ? Visibility.Visible : Visibility.Collapsed;
+            ExtraNote.Text = $"Read from {build.Name}: its own options that have no setting above, new ones included. Empty or unticked leaves the build's default.";
+            var set = settings.Extra.Keys.Count(k => options.Any(o => o.Name == k));
+            ExtraToggleText.Text = (settings.ShowExtra ? "Hide" : "Show") + $" {options.Count} more options" + (set > 0 ? $" ({set} set)" : "");
+            ExtraToggleIcon.Text = settings.ShowExtra ? "" : "";
+            ExtraPanel.Visibility = settings.ShowExtra ? Visibility.Visible : Visibility.Collapsed;
+            var extra = settings.Extra;
+            foreach (var o in options)
+            {
+                extra.TryGetValue(o.Name, out var saved);
+                var current = Convert.ToString(saved) ?? "";
+                var tip = string.IsNullOrEmpty(o.Description) ? o.Name : o.Name + (o.Placeholder != null ? " " + o.Placeholder : "") + "\n" + o.Description;
+                if (o.IsSwitch || o.IsBool)
+                {
+                    var box = new CheckBox { Content = Describe(o), IsChecked = current == "true", ToolTip = tip, Margin = new Thickness(0, 2, 0, 2) };
+                    box.Click += (s, e) =>
+                    {
+                        if (box.IsChecked == true) extra[o.Name] = "true"; else extra.Remove(o.Name);
+                        ExtraChanged();
+                    };
+                    ExtraPanel.Children.Add(box);
+                    continue;
+                }
+                var row = new Grid { Margin = new Thickness(0, 6, 0, 0), ToolTip = tip };
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                row.Children.Add(new TextBlock { Text = o.Label, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
+                    Foreground = (Brush)FindResource("TextSecondaryBrush"), FontSize = 12.5 });
+                FrameworkElement input;
+                if (o.Choices != null)
+                {
+                    var items = new List<string> { "Default" };
+                    items.AddRange(o.Choices);
+                    var combo = new ComboBox { ItemsSource = items, SelectedIndex = Math.Max(0, items.IndexOf(current)) };
+                    combo.SelectionChanged += (s, e) =>
+                    {
+                        if (combo.SelectedIndex <= 0) extra.Remove(o.Name); else extra[o.Name] = (string)combo.SelectedItem;
+                        ExtraChanged();
+                    };
+                    input = combo;
+                }
+                else
+                {
+                    var text = new TextBox { Text = current, Tag = (o.Placeholder ?? "").Trim('<', '>') + " (default)" };
+                    text.LostFocus += (s, e) =>
+                    {
+                        var v = text.Text.Trim();
+                        if (v.Length == 0) extra.Remove(o.Name); else extra[o.Name] = v;
+                        ExtraChanged();
+                    };
+                    input = text;
+                }
+                Grid.SetColumn(input, 1);
+                row.Children.Add(input);
+                ExtraPanel.Children.Add(row);
+            }
+        }
+
+        /// <summary>An option's line: its description where it has one, else its name.</summary>
+        static string Describe(EmulatorInstall.BuildOption o)
+        {
+            var d = o.Description ?? "";
+            if (d.Length == 0) return o.Label;
+            return d.Length > 90 ? d.Substring(0, 87).TrimEnd() + "…" : d;
+        }
+
+        void ExtraToggle_Click(object sender, RoutedEventArgs e)
+        {
+            settings.ShowExtra = !settings.ShowExtra;
+            settings.Save();
+            extraCount = -1;
+            BuildExtraOptions(EmulatorFor(Selected));
+        }
+
+        void ExtraChanged()
+        {
+            if (loading) return;
+            StoreGameSettings();
+            settings.Save();
+            library.Save();
+        }
+
         void UpdateDependent()
         {
             // A build without the scripts takes only kyty_emulator.exe's own options.
@@ -1061,6 +1157,7 @@ namespace KytyLauncher
             foreach (var c in new Control[] { GamePatch, GamePatchPick, GamePatchClear }) c.IsEnabled = cheats;
             ContentNote.Text = addons && cheats ? "" : !addons && !cheats ? $"Not in {build.Name}: add-ons, cheats." : !addons ? $"Not in {build.Name}: add-ons." : $"Not in {build.Name}: cheats.";
             foreach (var note in new[] { CompatNote, ContentNote }) note.Visibility = note.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+            BuildExtraOptions(build);
             // KytyPS5 zipeek's experimental eboot precompile: shown only for a game on a build that has it.
             var eboot = build.HasSwitch("KYTY_EBOOT_PRECOMPILE") ? Visibility.Visible : Visibility.Collapsed;
             EbootPrecompile.Visibility = eboot;

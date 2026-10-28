@@ -99,6 +99,18 @@ namespace KytyLauncher.Core
         public bool SkipLogos { get => Bool("skiplogos"); set => values["skiplogos"] = value; }
         public string AddCont { get => Str("addcont"); set => values["addcont"] = value ?? ""; }
         public string GamePatch { get => Str("gamepatch"); set => values["gamepatch"] = value ?? ""; }
+        /// <summary>The game's "More options of this build" (option name → "true" for a switch, else its value).</summary>
+        public Dictionary<string, object> Extra
+        {
+            get
+            {
+                if (values.TryGetValue("extra", out var v) && v is Dictionary<string, object> d) return d;
+                var fresh = new Dictionary<string, object>();
+                values["extra"] = fresh;
+                return fresh;
+            }
+        }
+
         // KytyPS5 zipeek: compute shaders from the game's executable, buffer strides read at run time.
         public bool EbootPrecompile { get => Bool("ebootprecompile"); set => values["ebootprecompile"] = value; }
 
@@ -121,6 +133,8 @@ namespace KytyLauncher.Core
         public bool RenderDoc { get => Bool("renderdoc"); set => values["renderdoc"] = value; }
         /// <summary>The Games page's view: "grid" (the default) or "list".</summary>
         public string View { get => values.ContainsKey("view") && Str("view") == "list" ? "list" : "grid"; set => values["view"] = value; }
+        /// <summary>Whether the Game Settings show "More options of this build" open.</summary>
+        public bool ShowExtra { get => Bool("showExtra"); set => values["showExtra"] = value; }
         public bool CheckUpdates { get => BoolOr("checkUpdates", true); set => values["checkUpdates"] = value; }
         public bool PrecompilePrompt { get => BoolOr("precompilePrompt", true); set => values["precompilePrompt"] = value; }
 
@@ -129,7 +143,7 @@ namespace KytyLauncher.Core
         public static readonly string[] GameKeys =
         {
             "resolution", "fullscreen", "aspect", "language", "redzone", "fps120", "vsync", "hdr", "render", "ratio", "quality", "framegen", "hud",
-            "safegpu", "amdcpu", "tessellation", "readbacklinear", "syncraw", "zmask", "skiplogos", "addcont", "gamepatch", "ebootprecompile",
+            "safegpu", "amdcpu", "tessellation", "readbacklinear", "syncraw", "zmask", "skiplogos", "addcont", "gamepatch", "ebootprecompile", "extra",
         };
 
         // The defaults of the newer game keys (not in launcher.ps1's list).
@@ -139,7 +153,8 @@ namespace KytyLauncher.Core
             ("skiplogos", false), ("addcont", ""), ("gamepatch", ""), ("ebootprecompile", false),
         };
 
-        public Dictionary<string, object> ExportGame() => GameKeys.ToDictionary(k => k, k => values.TryGetValue(k, out var v) ? v : null);
+        public Dictionary<string, object> ExportGame() => GameKeys.ToDictionary(k => k, k => k == "extra"
+            ? new Dictionary<string, object>(Extra) : values.TryGetValue(k, out var v) ? v : null);
 
         public void ImportGame(IDictionary<string, object> game)
         {
@@ -153,6 +168,7 @@ namespace KytyLauncher.Core
         {
             foreach (var d in Defaults) if (GameKeys.Contains(d.Key)) values[d.Key] = d.Value;
             foreach (var d in GameDefaults) values[d.Key] = d.Value;
+            values["extra"] = new Dictionary<string, object>();
             values.Remove("amdcpu"); // the CPU's vendor decides
         }
 

@@ -120,6 +120,12 @@ namespace KytyLauncher.Core
         };
 
         HashSet<string> options = new HashSet<string>(StringComparer.Ordinal);
+        /// <summary>The options whose --help line shows a value ("--trophy-notifications <true|false>"); the others are
+        /// switches ("--perf-overlay"). Builds change one into the other between releases.</summary>
+        HashSet<string> valued = new HashSet<string>(StringComparer.Ordinal);
+
+        /// <summary>Whether the build's option takes a value.</summary>
+        public bool TakesValue(string option) => valued.Contains(option);
         HashSet<string> switches = new HashSet<string>(StringComparer.Ordinal);
         /// <summary>Whether --help and the exe were read (until then nothing is offered as missing).</summary>
         public bool Probed { get; private set; }
@@ -140,13 +146,71 @@ namespace KytyLauncher.Core
         /// KYTY_DISPATCH_OVERLAP=0); null where the build has neither.</summary>
         public string SafeGpuSwitch => HasSwitch("KYTY_COMPUTE_CHAIN") ? "KYTY_COMPUTE_CHAIN" : HasSwitch("KYTY_DISPATCH_OVERLAP") ? "KYTY_DISPATCH_OVERLAP" : null;
 
+        /// <summary>An option as the build's --help describes it.</summary>
+        public sealed class BuildOption
+        {
+            public string Name;         // "--perf-overlay"
+            public string Placeholder;  // "<true|false>", "<path>", or null for a switch
+            public string Description;
+            public string[] Choices;    // from "<a|b|c>" (not ranges); null otherwise
+            public bool IsSwitch => Placeholder == null;
+            public bool IsBool => Choices != null && Choices.Length == 2 && Choices.Contains("true") && Choices.Contains("false");
+            public string Label => Name.Substring(2);
+        }
+
+        /// <summary>The options the launcher sets itself (its own controls, or the game it starts): not offered again.</summary>
+        static readonly HashSet<string> OwnOptions = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "--game", "--game-patch", "--addcont-dir", "--screen-width", "--screen-height", "--user-name", "--user-id",
+            "--controller-color", "--controller-volume", "--controller-vibration", "--keyboard-player", "--present-mode", "--gpu",
+            "--fullscreen", "--hdr", "--hide-cursor", "--amd-cpu", "--no-amd-cpu", "--vblank-frequency", "--console-language",
+            "--vulkan-validation", "--shader-validation", "--tessellation", "--readback-linear-images", "--sync-raw-image-buffers",
+            "--support-zmask", "--trophy-notifications", "--no-trophy-notifications", "--trophy-duration", "--perf-overlay",
+            "--skip-notice-screen", "--redzone", "--network-connected", "--rd", "--help", "--keymap",
+        };
+
+        List<BuildOption> allOptions = new List<BuildOption>();
+
+        /// <summary>The build's options that have no control of their own in the launcher (new ones appear here as builds
+        /// add them): shown under "More options of this build" in the Game Settings.</summary>
+        public IReadOnlyList<BuildOption> ExtraOptions => IsScripted ? new List<BuildOption>() : allOptions.Where(o => !OwnOptions.Contains(o.Name)).ToList();
+
+        /// <summary>The options of a --help text: "  --name <placeholder>   description", continued on indented lines.</summary>
+        static List<BuildOption> ParseOptions(string help)
+        {
+            var result = new List<BuildOption>();
+            BuildOption last = null;
+            foreach (var raw in (help ?? "").Replace("\r", "").Split('\n'))
+            {
+                var m = Regex.Match(raw, @"^\s+(--[a-z0-9-]+)(?:[ \t]+(<[^>]*>(?:\[[^\]]*\])?))?(?:\s{2,}(.*))?$");
+                if (m.Success)
+                {
+                    var ph = m.Groups[2].Success ? m.Groups[2].Value : null;
+                    string[] choices = null;
+                    var inner = ph == null ? null : Regex.Match(ph, "^<([^>]*)>$");
+                    if (inner != null && inner.Success && inner.Groups[1].Value.Contains("|"))
+                        choices = inner.Groups[1].Value.Split('|').Select(c => c.Trim()).Where(c => c.Length > 0).ToArray();
+                    last = new BuildOption { Name = m.Groups[1].Value, Placeholder = ph, Description = m.Groups[3].Value.Trim(), Choices = choices };
+                    if (!result.Any(o => o.Name == last.Name)) result.Add(last);
+                    continue;
+                }
+                // A description continued on the next line (indented, no option of its own).
+                if (last != null && Regex.IsMatch(raw, @"^\s{20,}\S")) last.Description = (last.Description + " " + raw.Trim()).Trim();
+                else last = null;
+            }
+            return result;
+        }
+
         public void LoadVersion()
         {
             if (!Exists) return;
             Emulator.RunHidden(Exe, "--help", Folder, out var output);
             var m = Regex.Match(output ?? "", @"ver\s*=\s*([^,\s]+),\s*git\s*=\s*([^,\s]+)");
             var text = m.Success ? $"{m.Groups[1].Value}, {m.Groups[2].Value}" : null;
-            var found = new HashSet<string>(Regex.Matches(output ?? "", @"(?m)^\s+(--[a-z0-9-]+)").Cast<Match>().Select(x => x.Groups[1].Value), StringComparer.Ordinal);
+            var lines = Regex.Matches(output ?? "", @"(?m)^\s+(--[a-z0-9-]+)([ \t]+<)?").Cast<Match>().ToList();
+            var found = new HashSet<string>(lines.Select(x => x.Groups[1].Value), StringComparer.Ordinal);
+            var takesValue = new HashSet<string>(lines.Where(x => x.Groups[2].Success).Select(x => x.Groups[1].Value), StringComparer.Ordinal);
+            var parsed = ParseOptions(output);
             var held = new HashSet<string>(StringComparer.Ordinal);
             try
             {
@@ -158,6 +222,8 @@ namespace KytyLauncher.Core
             App.OnUi(() =>
             {
                 options = found;
+                valued = takesValue;
+                allOptions = parsed;
                 switches = held;
                 Probed = true;
                 if (text != null) Version = text;
@@ -188,7 +254,19 @@ namespace KytyLauncher.Core
                 "--console-language", s.Language.ToString() };
             void flag(string option, bool on) { if (on && Supports(option)) a.Add(option); }
             void value(string option, string v) { if (!string.IsNullOrEmpty(v) && Supports(option)) a.AddRange(new[] { option, v }); }
-            string tf(bool on) => on ? "true" : "false";
+            // An on/off option as this build spells it: "--x true|false" where its --help shows a value, else the switch
+            // "--x" when on (and, where the build has it, "--no-x" when off and off is not its default).
+            void toggle(string option, bool on, bool defaultOn = false)
+            {
+                if (!Supports(option))
+                {
+                    var negative = "--no-" + option.Substring(2);
+                    if (!on && defaultOn && Supports(negative)) a.Add(negative);
+                    return;
+                }
+                if (TakesValue(option)) { if (on != defaultOn) a.AddRange(new[] { option, on ? "true" : "false" }); }
+                else if (on) a.Add(option);
+            }
 
             // Game Settings.
             flag("--fullscreen", s.Fullscreen);
@@ -202,11 +280,11 @@ namespace KytyLauncher.Core
             if (s.AmdCpu) flag("--amd-cpu", true);
             else if (IsAmdCpu) flag("--no-amd-cpu", true);
             flag("--tessellation", s.Tessellation);
-            if (s.ReadbackLinear) value("--readback-linear-images", "true");
-            if (s.SyncRawImages) value("--sync-raw-image-buffers", "true");
-            if (s.ZMask) value("--support-zmask", "true");
-            if (s.Hud >= 1) value("--perf-overlay", "true");
-            if (s.SkipLogos) value("--skip-notice-screen", "true");
+            toggle("--readback-linear-images", s.ReadbackLinear);
+            toggle("--sync-raw-image-buffers", s.SyncRawImages);
+            toggle("--support-zmask", s.ZMask);
+            toggle("--perf-overlay", s.Hud >= 1);
+            toggle("--skip-notice-screen", s.SkipLogos);
             if (!string.IsNullOrWhiteSpace(s.AddCont) && Directory.Exists(s.AddCont)) value("--addcont-dir", Q(s.AddCont));
             if (!string.IsNullOrWhiteSpace(s.GamePatch) && File.Exists(s.GamePatch)) value("--game-patch", Q(s.GamePatch));
 
@@ -219,13 +297,26 @@ namespace KytyLauncher.Core
             if (s.Vibration != 100) value("--controller-vibration", s.Vibration.ToString());
             if (s.SpeakerVolume != 50) value("--controller-volume", s.SpeakerVolume.ToString());
             if (s.KeyboardPlayer > 0) value("--keyboard-player", s.KeyboardPlayer.ToString());
-            if (s.Network) value("--network-connected", "true");
-            value("--trophy-notifications", tf(s.Trophies));
+            toggle("--network-connected", s.Network);
+            toggle("--trophy-notifications", s.Trophies, defaultOn: true);
             if (s.Trophies && s.TrophyDuration != 6) value("--trophy-duration", s.TrophyDuration.ToString());
             flag("--hide-cursor", s.HideCursor);
-            if (s.VulkanValidation) value("--vulkan-validation", "true");
-            if (s.ShaderValidation) value("--shader-validation", "true");
+            toggle("--vulkan-validation", s.VulkanValidation);
+            toggle("--shader-validation", s.ShaderValidation);
             flag("--rd", s.RenderDoc);
+
+            // The game's "More options of this build": each one this build still has, as it spells it now.
+            foreach (var kv in s.Extra)
+            {
+                var option = allOptions.FirstOrDefault(o => o.Name == kv.Key);
+                if (option == null || OwnOptions.Contains(option.Name)) continue;
+                var v = Convert.ToString(kv.Value) ?? "";
+                if (option.IsSwitch) { if (v == "true") a.Add(option.Name); continue; }
+                v = Regex.Replace(v, "[\"%^&|<>\r\n]", "").Trim();
+                if (v.Length == 0) continue;
+                if (option.Choices != null && !option.Choices.Contains(v)) continue;
+                a.AddRange(new[] { option.Name, v.Contains(" ") ? Q(v) : v });
+            }
             return string.Join(" ", a);
         }
 

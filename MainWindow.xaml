@@ -917,6 +917,18 @@
                                             </StackPanel>
                                         </Button>
 
+                                        <!-- Every other option of the game's build, read from its help text (new options appear by themselves) -->
+                                        <StackPanel x:Name="ExtraSection" Visibility="Collapsed">
+                                            <TextBlock Style="{StaticResource Label}" Text="More options of this build"/>
+                                            <TextBlock x:Name="ExtraNote" Style="{StaticResource Note}" Margin="0,0,0,8"/>
+                                            <Button x:Name="ExtraToggle" HorizontalAlignment="Left" Click="ExtraToggle_Click">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="ExtraToggleIcon" Style="{StaticResource Icon}" Text="&#xE70D;" FontSize="11" Margin="0,1,9,0"/>
+                                                    <TextBlock x:Name="ExtraToggleText" FontSize="12.5"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <StackPanel x:Name="ExtraPanel" Margin="0,6,0,0"/>
+                                        </StackPanel>
                                         <TextBlock Style="{StaticResource Note}" Margin="0,16,0,0"
                                                    Text="Options this game's emulator does not take are greyed out and not passed to it. The profile, controller, GPU, notifications and debug options are in Settings, the same for every game."/>
                                     </StackPanel>
