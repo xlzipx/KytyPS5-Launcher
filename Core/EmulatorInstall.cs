@@ -201,9 +201,14 @@ namespace KytyLauncher.Core
             return result;
         }
 
+        DateTime probedExe;
+        /// <summary>Whether the build's exe changed since its options were read (an update made outside the launcher).</summary>
+        public bool ProbeStale => !Probed || (Exists && File.GetLastWriteTimeUtc(Exe) != probedExe);
+
         public void LoadVersion()
         {
             if (!Exists) return;
+            var stamp = File.GetLastWriteTimeUtc(Exe);
             Emulator.RunHidden(Exe, "--help", Folder, out var output);
             var m = Regex.Match(output ?? "", @"ver\s*=\s*([^,\s]+),\s*git\s*=\s*([^,\s]+)");
             var text = m.Success ? $"{m.Groups[1].Value}, {m.Groups[2].Value}" : null;
@@ -224,6 +229,7 @@ namespace KytyLauncher.Core
                 options = found;
                 valued = takesValue;
                 allOptions = parsed;
+                probedExe = stamp;
                 switches = held;
                 Probed = true;
                 if (text != null) Version = text;

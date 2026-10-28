@@ -18,7 +18,8 @@ keeps every build up to date.
 - **Works out of the box**: without an emulator it offers to download the latest official KytyPS5 release in one click.
 - **Several emulator builds side by side**: the official KytyPS5 and community builds made for particular games. Each
   game picks its build, and the launcher reads what each build supports (its `--help` and switches), so a game is offered
-  only the options its build takes; the rest are greyed out.
+  only the options its build takes; the rest are greyed out. Every other option a build lists - new ones included, as builds add them - appears under
+  *More options of this build* in the game's settings.
 - **Updates for every build** from its GitHub releases: the Windows package is downloaded, checked against the SHA-256
   digest GitHub lists for it, and installed over the program files. Saves, shader caches and settings stay, and the
   replaced files are backed up.

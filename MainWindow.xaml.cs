@@ -1035,8 +1035,7 @@ namespace KytyLauncher
             ExtraPanel.Children.Clear();
             ExtraSection.Visibility = options.Count > 0 && Selected != null ? Visibility.Visible : Visibility.Collapsed;
             ExtraNote.Text = $"Read from {build.Name}: its own options that have no setting above, new ones included. Empty or unticked leaves the build's default.";
-            var set = settings.Extra.Keys.Count(k => options.Any(o => o.Name == k));
-            ExtraToggleText.Text = (settings.ShowExtra ? "Hide" : "Show") + $" {options.Count} more options" + (set > 0 ? $" ({set} set)" : "");
+            UpdateExtraToggle(options);
             ExtraToggleIcon.Text = settings.ShowExtra ? "" : "";
             ExtraPanel.Visibility = settings.ShowExtra ? Visibility.Visible : Visibility.Collapsed;
             var extra = settings.Extra;
@@ -1076,7 +1075,8 @@ namespace KytyLauncher
                 }
                 else
                 {
-                    var text = new TextBox { Text = current, Tag = (o.Placeholder ?? "").Trim('<', '>') + " (default)" };
+                    var hint = System.Text.RegularExpressions.Regex.Replace(o.Placeholder ?? "", @"[<>\[\]]", "");
+                    var text = new TextBox { Text = current, Tag = hint + " (default)" };
                     text.LostFocus += (s, e) =>
                     {
                         var v = text.Text.Trim();
@@ -1107,8 +1107,15 @@ namespace KytyLauncher
             BuildExtraOptions(EmulatorFor(Selected));
         }
 
+        void UpdateExtraToggle(IReadOnlyList<EmulatorInstall.BuildOption> options)
+        {
+            var set = settings.Extra.Keys.Count(k => options.Any(o => o.Name == k));
+            ExtraToggleText.Text = (settings.ShowExtra ? "Hide" : "Show") + $" {options.Count} more options" + (set > 0 ? $" ({set} set)" : "");
+        }
+
         void ExtraChanged()
         {
+            if (extraBuild != null) UpdateExtraToggle(extraBuild.ExtraOptions);
             if (loading) return;
             StoreGameSettings();
             settings.Save();
@@ -1403,6 +1410,8 @@ namespace KytyLauncher
             game.LastPlayed = DateTime.Now;
             library.Save();
             var build = EmulatorFor(game);
+            // The options as the build spells them now (read again when its exe changed since).
+            if (build.Exists && !build.IsScripted && build.ProbeStale) build.LoadVersion();
             if (!emulators.Any(x => x.Exists))
             {
                 MessageBox.Show(this, "There is no KytyPS5 emulator yet. Download it with the button above the game list (or add a KytyPS5 folder you have in Settings → Emulators), then play.",
@@ -1449,6 +1458,7 @@ namespace KytyLauncher
         {
             ReadSettings();
             settings.Save();
+            if (build.ProbeStale) build.LoadVersion();
             Process process;
             try { process = build.PrepareDirect(settings, game.Path); }
             catch (Exception ex) { MessageBox.Show(this, ex.Message, "KytyPS5", MessageBoxButton.OK, MessageBoxImage.Error); return; }
