@@ -167,16 +167,25 @@ namespace KytyLauncher.Core
                 var digest = Regex.Match(html.Substring(links[i].Index, end - links[i].Index), "sha256:([0-9a-f]{64})");
                 packages.Add((name, url, digest.Success ? Hex(digest.Groups[1].Value) : null));
             }
-            var chosen = packages.Where(p => p.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) && !Regex.IsMatch(p.Name, "linux|macos|darwin|osx|android", RegexOptions.IgnoreCase))
-                .OrderByDescending(p => Regex.IsMatch(p.Name, "win", RegexOptions.IgnoreCase)).ToList();
-            if (chosen.Count > 0)
+            var chosen = WindowsPackage(packages.Select(p => p.Name));
+            if (chosen != null)
             {
-                release.Asset = chosen[0].Name;
-                release.Url = chosen[0].Url;
-                release.Sha256 = chosen[0].Sha;
+                var package = packages.First(p => p.Name == chosen);
+                release.Asset = package.Name;
+                release.Url = package.Url;
+                release.Sha256 = package.Sha;
             }
             return release;
         }
+
+        /// <summary>The release's Windows package: a .zip, named for Windows, else the plainest name not for another system
+        /// (chenxiao07's KytyPS5-v20261030.zip beside its -linux- and -steamdeck- ones).</summary>
+        public static string WindowsPackage(IEnumerable<string> assets) => assets
+            .Where(a => a.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                        !Regex.IsMatch(a, "linux|ubuntu|steam|deck|macos|darwin|osx|android|aarch64|arm64|symbols|pdb", RegexOptions.IgnoreCase))
+            .OrderByDescending(a => Regex.IsMatch(a, "win", RegexOptions.IgnoreCase))
+            .ThenBy(a => a.Length)
+            .FirstOrDefault();
 
         static byte[] Hex(string hex) => Enumerable.Range(0, hex.Length / 2).Select(i => Convert.ToByte(hex.Substring(i * 2, 2), 16)).ToArray();
 
@@ -195,16 +204,12 @@ namespace KytyLauncher.Core
                 Page = Convert.ToString(root["html_url"]),
                 Published = DateTime.TryParse(Convert.ToString(root["published_at"]), null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var p) ? p : DateTime.MinValue,
             };
-            // The Windows package: a .zip, named for Windows, or at least not for another system.
-            var assets = ((System.Collections.ArrayList)root["assets"]).Cast<Dictionary<string, object>>()
-                .Select(a => (Name: Convert.ToString(a["name"]), Asset: a))
-                .Where(a => a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) && !Regex.IsMatch(a.Name, "linux|macos|darwin|osx|android", RegexOptions.IgnoreCase))
-                .OrderByDescending(a => Regex.IsMatch(a.Name, "win", RegexOptions.IgnoreCase))
-                .ToList();
-            if (assets.Count > 0)
+            var assets = ((System.Collections.ArrayList)root["assets"]).Cast<Dictionary<string, object>>().ToList();
+            var chosen = WindowsPackage(assets.Select(a => Convert.ToString(a["name"])));
+            if (chosen != null)
             {
-                var a = assets[0].Asset;
-                release.Asset = assets[0].Name;
+                var a = assets.First(x => Convert.ToString(x["name"]) == chosen);
+                release.Asset = chosen;
                 release.Url = Convert.ToString(a["browser_download_url"]);
                 release.Size = Convert.ToInt64(a["size"]);
                 var digest = a.TryGetValue("digest", out var d) ? Convert.ToString(d) : "";
@@ -279,7 +284,9 @@ namespace KytyLauncher.Core
             var package = Path.Combine(work, release.Asset);
             var unpacked = Path.Combine(work, "unpacked");
             Directory.CreateDirectory(work);
+            // What an earlier update that failed left behind.
             if (Directory.Exists(unpacked)) Directory.Delete(unpacked, true);
+            foreach (var old in Directory.GetFiles(work, "*.zip")) try { File.Delete(old); } catch { }
 
             progress($"Downloading {release.Asset} ({release.Size / 1048576.0:0.#} MB)…");
             using (var client = Client())
